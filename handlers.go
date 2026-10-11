@@ -57,15 +57,21 @@ func (c *Client) handleMember(_ context.Context, ev *event.Event) {
 		return
 	}
 
+	targetID := id.UserID(*ev.StateKey)
+
 	c.Lock()
 	defer c.Unlock()
 
-	if _, ok := c.users[ev.Sender]; !ok {
-		c.users[ev.Sender] = &User{ID: ev.Sender, MemberEventContent: member}
+	u, ok := c.users[targetID]
+	if !ok {
+		u = &User{ID: targetID}
+		c.users[targetID] = u
 	}
 
+	u.MemberEventContent = member
+
 	if member.IsDirect {
-		c.addDirectLocked(ev.RoomID, id.UserID(*ev.StateKey), member)
+		c.addDirectLocked(ev.RoomID, targetID, member)
 	}
 }
 
@@ -136,7 +142,7 @@ func (c *Client) handleReaction(_ context.Context, ev *event.Event) {
 	}
 
 	content := ev.Content.AsReaction()
-	if content == nil {
+	if content == nil || content.RelatesTo.EventID == "" {
 		return
 	}
 

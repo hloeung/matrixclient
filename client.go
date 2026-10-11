@@ -11,10 +11,11 @@ import (
 	"sync/atomic"
 	"time"
 
-	logger "github.com/sirupsen/logrus"
 	"maunium.net/go/mautrix"
 	"maunium.net/go/mautrix/event"
 	"maunium.net/go/mautrix/id"
+
+	logger "github.com/sirupsen/logrus"
 )
 
 // Client is a logged in Matrix client keeping track of rooms and users.
@@ -189,7 +190,7 @@ func (c *Client) Rooms() []RoomInfo {
 
 		ch.RUnlock()
 
-		if direct && alias == "" {
+		if alias == "" {
 			alias = id.RoomAlias(roomID)
 		}
 
@@ -197,7 +198,11 @@ func (c *Client) Rooms() []RoomInfo {
 			continue
 		}
 
-		rooms = append(rooms, RoomInfo{ID: roomID, Name: strings.Replace(string(alias), ":", "/", 1), IsDirect: direct})
+		rooms = append(rooms, RoomInfo{
+			ID:       roomID,
+			Name:     strings.Replace(string(alias), ":", "/", 1),
+			IsDirect: direct,
+		})
 	}
 
 	return rooms
