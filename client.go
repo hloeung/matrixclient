@@ -332,7 +332,8 @@ func (c *Client) SendDirect(ctx context.Context, userID id.UserID, parentID id.E
 		direct[userID] = append(slices.Clone(direct[userID]), roomID)
 
 		// m.direct is not set by the homeserver, persist it ourselves.
-		if err := c.mc.SetAccountData(ctx, event.AccountDataDirectChats.Type, direct); err != nil {
+		err = c.mc.SetAccountData(ctx, event.AccountDataDirectChats.Type, direct)
+		if err != nil {
 			c.logger.Errorf("failed to persist m.direct for %s: %s", roomID, err)
 		}
 
